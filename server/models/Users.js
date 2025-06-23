@@ -39,16 +39,40 @@ const User = {
     return rows[0];
   },
 
-  async getMovements(userId) {
-    console.log("Authenticated user ID:", userId);
-    const { rows } = await db.query(
+  async getMovements(
+    userId,
+    { page = 1, limit = 5, sortBy = "created_at", sortOrder = "DESC" }
+  ) {
+    // Calculate offset
+    const offset = (page - 1) * limit;
+
+    // Validate sort columns to prevent SQL injection
+    const validSortColumns = ["created_at", "amount", "type"];
+    const sortColumn = validSortColumns.includes(sortBy)
+      ? sortBy
+      : "created_at";
+    const order = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    const { rows: movements } = await db.query(
       `SELECT * FROM movements 
        WHERE user_id = $1 
-       ORDER BY created_at DESC`,
+       ORDER BY ${sortColumn} ${order}
+       LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
+    );
+
+    // Get total count
+    const { rows: countRows } = await db.query(
+      `SELECT COUNT(*) FROM movements WHERE user_id = $1`,
       [userId]
     );
-    console.log("Found movements:", rows);
-    return rows;
+
+    return {
+      movements,
+      totalCount: parseInt(countRows[0].count),
+      totalPages: Math.ceil(countRows[0].count / limit),
+      currentPage: page,
+    };
   },
 };
 
