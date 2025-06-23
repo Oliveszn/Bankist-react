@@ -3,8 +3,8 @@ const db = require("../db");
 
 const getUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const existingUser = await User.findByUserId(id);
+    const userId = req.user.id;
+    const existingUser = await User.findByUserId(userId);
     if (!existingUser) {
       return res.status(404).json({
         success: false,
@@ -27,8 +27,8 @@ const getUser = async (req, res) => {
 
 const getMovements = async (req, res) => {
   try {
-    const { id } = req.params;
-    const movements = await User.getMovements(id);
+    const userId = req.user.id;
+    const movements = await User.getMovements(userId);
 
     res.status(200).json({
       success: true,

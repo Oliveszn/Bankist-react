@@ -5,6 +5,7 @@ const cors = require("cors");
 const db = require("./db");
 const authRoute = require("./routes/authRoutes");
 const userRoute = require("./routes/userRoutes");
+const movementRoute = require("./routes/movementRoutes");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -32,5 +33,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", authRoute);
 app.use("/api/auth", userRoute);
+app.use("/api", movementRoute);
 
 app.listen(PORT, () => console.log(`server on ports ${PORT}`));

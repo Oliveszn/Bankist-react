@@ -21,7 +21,6 @@ const authMiddleware = async (req, res, next) => {
     if (!decoded.userId) {
       throw new Error("Token missing required claims");
     }
-    console.log("Decoded token:", decoded);
     req.user = {
       id: decoded.userId,
       username: decoded.username,
