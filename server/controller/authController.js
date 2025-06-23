@@ -166,7 +166,7 @@ const logout = (req, res) => {
 };
 
 const deleteAccount = async (req, res) => {
-  const { username, password } = req.body;
+  const { username } = req.body;
   try {
     const existingUser = await User.findByUsername(username);
     if (!existingUser) {
@@ -176,18 +176,18 @@ const deleteAccount = async (req, res) => {
       });
     }
 
-    const checkPasswordMatch = await User.comparePassword(
-      password,
-      existingUser.password
-    );
-    if (!checkPasswordMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+    // const checkPasswordMatch = await User.comparePassword(
+    //   password,
+    //   existingUser.password
+    // );
+    // if (!checkPasswordMatch) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "Invalid credentials",
+    //   });
+    // }
 
-    const deleted = await User.delete(username, password);
+    const deleted = await User.delete(username);
     if (!deleted) {
       throw new Error("Failed to delete user");
     }

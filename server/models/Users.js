@@ -24,11 +24,11 @@ const User = {
     return bcrypt.compare(password, hashedPassword);
   },
 
-  async delete(username, password) {
+  async delete(username) {
     // Using CASCADE in your schema will automatically delete related records
     const { rowCount } = await db.query(
       "DELETE FROM users WHERE username = $1 RETURNING id",
-      [username, password]
+      [username]
     );
     return rowCount > 0; // Returns true if user was deleted
   },
