@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const db = require("./db");
 const authRoute = require("./routes/authRoutes");
+const userRoute = require("./routes/userRoutes");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -30,5 +31,6 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", authRoute);
+app.use("/api/auth", userRoute);
 
 app.listen(PORT, () => console.log(`server on ports ${PORT}`));

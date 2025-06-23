@@ -32,6 +32,24 @@ const User = {
     );
     return rowCount > 0; // Returns true if user was deleted
   },
+
+  async findByUserId(userId) {
+    const query = "SELECT * FROM users WHERE id = $1";
+    const { rows } = await db.query(query, [userId]);
+    return rows[0];
+  },
+
+  async getMovements(userId) {
+    console.log("Authenticated user ID:", userId);
+    const { rows } = await db.query(
+      `SELECT * FROM movements 
+       WHERE user_id = $1 
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+    console.log("Found movements:", rows);
+    return rows;
+  },
 };
 
 module.exports = User;

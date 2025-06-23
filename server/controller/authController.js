@@ -5,10 +5,9 @@ const db = require("../db");
 
 //register a user
 const registerUser = async (req, res) => {
-  let client;
+  const client = await db.connect();
   const { firstname, lastname, username, password } = req.body;
   try {
-    const client = await db.connect();
     await client.query("BEGIN");
     if (![firstname, lastname, username, password].every(Boolean)) {
       return res.status(401).json({ error: "missing fields" });
@@ -81,7 +80,7 @@ const registerUser = async (req, res) => {
       message: "Registration failed",
     });
   } finally {
-    client.release(); // Always release the client back to the pool
+    client.release();
   }
 };
 
@@ -109,7 +108,7 @@ const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: User.id, username: User.username },
+      { userId: existingUser.id, username: existingUser.username },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
