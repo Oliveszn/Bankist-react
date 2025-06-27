@@ -14,7 +14,7 @@ const PORT = process.env.PORT;
 db.query("SELECT NOW()")
   .then(() => console.log("DB connected"))
   .catch((err) => console.error("DB connection error:", err));
-
+console.log("CLIENT_BASE_URL:", process.env.CLIENT_BASE_URL);
 app.use(
   cors({
     origin: process.env.CLIENT_BASE_URL,
@@ -27,6 +27,7 @@ app.use(
       "Pragma",
     ],
     credentials: true,
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   })
 );
 app.use(cookieParser());

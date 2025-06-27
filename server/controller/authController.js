@@ -206,9 +206,57 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const authMiddleware = async (req, res, next) => {
+  try {
+    // Try to get token from either cookies or Authorization header
+    const token =
+      req.cookies?.token ||
+      req.headers.authorization?.replace("Bearer ", "") ||
+      req.headers["x-access-token"];
+
+    // if (!token) {
+    //   return res.status(200).json({
+    //     success: false,
+    //     message: "Authentication required",
+    //   });
+    // }
+    if (!token) {
+      req.user = null;
+      req.isAuthenticated = false;
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded.userId) {
+      throw new Error("Token missing required claims");
+    }
+    req.user = {
+      id: decoded.userId,
+      username: decoded.username,
+    };
+
+    return next();
+  } catch (error) {
+    console.error("JWT verification failed:", error);
+    // Clear cookie if exists
+    res.clearCookie("token");
+
+    const message =
+      error.name === "TokenExpiredError"
+        ? "Session expired, please login again"
+        : "Invalid authentication";
+
+    return res.status(401).json({
+      success: false,
+      message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   logout,
   deleteAccount,
+  authMiddleware,
 };

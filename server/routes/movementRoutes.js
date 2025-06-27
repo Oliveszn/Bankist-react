@@ -3,7 +3,7 @@ const {
   requestLoan,
   transferMoney,
 } = require("../controller/movementController");
-const authMiddleware = require("../middleware/authMiddleware");
+const { authMiddleware } = require("../controller/authController");
 const router = express.Router();
 
 router.post("/loan", authMiddleware, requestLoan);
