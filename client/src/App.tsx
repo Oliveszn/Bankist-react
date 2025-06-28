@@ -3,9 +3,6 @@ import { checkAuth } from "./store/auth-slice";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import CheckAuth from "./components/common/CheckAuth";
-import AuthLayout from "./components/auth/AuthLayout";
-import AuthRegister from "./pages/auth/AuthRegister";
-import AuthLogin from "./pages/auth/AuthLogin";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import { AuthModal } from "./components/auth/AuthModal";
@@ -75,26 +72,7 @@ function App() {
             </CheckAuth>
           }
         />
-        <Route
-          path="/auth"
-          element={
-            <CheckAuth isAuthenticated={isAuthenticated}>
-              <AuthLayout />
-            </CheckAuth>
-          }
-        >
-          <Route path="login" element={<AuthLogin />} />
-          <Route path="register" element={<AuthRegister />} />
-        </Route>
       </Routes>
-      {/* <button
-        onClick={() =>
-          navigate("/login", { state: { from: location.pathname } })
-        }
-        className="fixed bottom-4 right-4 bg-blue-500 text-white p-3 rounded-full shadow-lg"
-      >
-        Login
-      </button> */}
     </>
   );
 }

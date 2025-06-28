@@ -1,4 +1,5 @@
 // components/AuthModal.tsx
+import { authUser } from "../../store/auth-slice";
 import { useAppDispatch } from "../../store/hooks";
 import { showToast } from "../../store/ui-slice/toast-slice";
 import { AuthForm } from "./AuthForm";
@@ -22,45 +23,44 @@ export const AuthModal = ({ mode, onClose }: AuthModalProps) => {
   const dispatch = useAppDispatch();
 
   const handleSubmit = async (data: AuthFormData) => {
-    // try {
+    try {
+      const result = await dispatch(
+        authUser({ formData: data, isLogin: mode === "login" })
+      ).unwrap();
 
-    // } catch (error) {
-
-    // }
-    // try {
-    //   const endpoint =
-    //     mode === "login" ? "/api/auth/login" : "/api/auth/register";
-    //   const response = await fetch(endpoint, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(data),
-    //   });
-
-    //   if (response.ok) {
-    //     onClose();
-    //     // Redirect or refresh user state
-    //   } else {
-    //     const error = await response.json();
-    //     alert(error.message || "Authentication failed");
-    //   }
-    // } catch (error) {
-    //   console.error("Auth error:", error);
-    //   alert("An error occurred during authentication");
-    // }
-    dispatch(
-      showToast({
-        message: "This is a toast from Redux!",
-        type: "success",
-      })
-    );
-
-    console.log(data);
+      if (result.success) {
+        onClose();
+        dispatch(
+          showToast({
+            message:
+              mode === "login" ? "Login Successful" : "Registration Successful",
+            type: "success",
+          })
+        );
+        navigate("/dashboard");
+      } else {
+        dispatch(
+          showToast({
+            message: result.message || "Authentication failed",
+            type: "error",
+          })
+        );
+      }
+    } catch (error: any) {
+      const message =
+        typeof error === "string"
+          ? error
+          : error?.message || "An unexpected error occurred";
+      dispatch(
+        showToast({
+          message: message,
+          type: "error",
+        })
+      );
+    }
   };
 
   const handleSwitchMode = () => {
-    // navigate(mode === "login" ? "/register" : "/login");
     /// this preserves the from state (knows where you are coming from)
     const newPath = mode === "login" ? "/register" : "/login";
     navigate(newPath, { state: location.state });

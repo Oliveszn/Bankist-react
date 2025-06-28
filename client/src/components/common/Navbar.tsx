@@ -1,9 +1,11 @@
 import logo from "../../../public/logo.png";
-import { useAppSelector } from "../../store/hooks";
+import { logoutUser } from "../../store/auth-slice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   let links = [
     { name: "Home", link: "/shop" },
@@ -11,14 +13,15 @@ const Navbar = () => {
     { name: "Contact Us", link: "/store" },
   ];
 
+  const handleLogOut = () => {
+    dispatch(logoutUser());
+  };
+
   return (
     <nav className="w-full shadow-bottom bg-[#ffffff]">
       <div className=" flex justify-between items-center py-4 px-6">
         {user ? (
-          <p className="text-xl sm:text-2xl lg:text-3xl font-medium">
-            {" "}
-            Welcome back, {user}
-          </p>
+          <p className="font-medium"> Welcome back,{user.username}</p>
         ) : (
           <img src={logo} alt="logo" className="h-12" />
         )}
@@ -42,7 +45,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center gap-4">
           {user && (
             <div>
-              <button>Log out</button>
+              <button onClick={handleLogOut}>Log out</button>
             </div>
           )}
           {!user && (
