@@ -10,9 +10,12 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import { AuthModal } from "./components/auth/AuthModal";
 import Navbar from "./components/common/Navbar";
+import ToastNotifs from "./components/common/ToastNotifs";
+import { hideToast } from "./store/ui-slice/toast-slice";
 
 function App() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const toast = useAppSelector((state) => state.toast);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,12 +41,22 @@ function App() {
   };
 
   useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => dispatch(hideToast()), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show, dispatch]);
+
+  useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
 
   return (
     <>
       <Navbar />
+      {toast.show && (
+        <ToastNotifs toast={toast} hideToast={() => dispatch(hideToast())} />
+      )}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route

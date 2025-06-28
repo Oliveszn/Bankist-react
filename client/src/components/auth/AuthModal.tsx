@@ -1,4 +1,6 @@
 // components/AuthModal.tsx
+import { useAppDispatch } from "../../store/hooks";
+import { showToast } from "../../store/ui-slice/toast-slice";
 import { AuthForm } from "./AuthForm";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -17,8 +19,14 @@ interface AuthFormData {
 export const AuthModal = ({ mode, onClose }: AuthModalProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useAppDispatch();
 
   const handleSubmit = async (data: AuthFormData) => {
+    // try {
+
+    // } catch (error) {
+
+    // }
     // try {
     //   const endpoint =
     //     mode === "login" ? "/api/auth/login" : "/api/auth/register";
@@ -41,6 +49,13 @@ export const AuthModal = ({ mode, onClose }: AuthModalProps) => {
     //   console.error("Auth error:", error);
     //   alert("An error occurred during authentication");
     // }
+    dispatch(
+      showToast({
+        message: "This is a toast from Redux!",
+        type: "success",
+      })
+    );
+
     console.log(data);
   };
 

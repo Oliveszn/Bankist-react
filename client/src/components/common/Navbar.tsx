@@ -1,4 +1,3 @@
-import { useState } from "react";
 import logo from "../../../public/logo.png";
 import { useAppSelector } from "../../store/hooks";
 import { Link, useNavigate } from "react-router-dom";
