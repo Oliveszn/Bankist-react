@@ -5,6 +5,6 @@ const { authMiddleware } = require("../controller/authController");
 const router = express.Router();
 
 router.get("/get", authMiddleware, getUser);
-router.get("/", authMiddleware, getMovements);
+router.get("/movements", authMiddleware, getMovements);
 
 module.exports = router;

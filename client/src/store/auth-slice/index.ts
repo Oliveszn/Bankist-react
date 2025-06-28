@@ -2,10 +2,15 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { AxiosError } from "axios";
 
+////had to add this because it keeps redirecting me from dashboard page
+/////redux auth state is reset by default on reload so isauthenticated becomes false
+const userFromStorage = localStorage.getItem("authUser");
+
 interface User {
   id: string;
   username: string;
-  lastname: string;
+  firstname: string;
+  balance: number;
 }
 
 interface AuthFormData {
@@ -18,7 +23,13 @@ interface AuthFormData {
 interface AuthResponse {
   success: boolean;
   message?: string;
-  user?: User;
+  // user?: User;
+  user?: {
+    id: string;
+    username: string;
+    firstname: string;
+    balance: number;
+  };
 }
 
 interface AuthState {
@@ -29,48 +40,10 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
+  isAuthenticated: !!userFromStorage,
   isLoading: false,
-  user: null,
+  user: userFromStorage ? JSON.parse(userFromStorage) : null,
 };
-
-// export const registerUser = createAsyncThunk(
-//   "auth/register",
-//   async (formData) => {
-//     const response = await axios.post(
-//       `${import.meta.env.VITE_API_URL}/api/auth/register`,
-//       formData,
-//       {
-//         withCredentials: true,
-//       }
-//     );
-//     return response.data;
-//   }
-// );
-
-// export const loginUser = createAsyncThunk(
-//   "/auth/login",
-
-//   async (formData: AuthFormData, { rejectWithValue }) => {
-//     try {
-//       const response = await axios.post(
-//         `${import.meta.env.VITE_API_URL}/api/auth/login`,
-//         formData,
-//         {
-//           withCredentials: true,
-//         }
-//       );
-//       return response.data;
-//     } catch (error) {
-//       console.error(error);
-//       if (error instanceof AxiosError) {
-//         return rejectWithValue(error.response?.data || error.message);
-//       }
-
-//       return rejectWithValue("An unexpected error occurred");
-//     }
-//   }
-// );
 
 export const authUser = createAsyncThunk(
   "auth/user",
@@ -155,32 +128,6 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // .addCase(registerUser.pending, (state) => {
-      //   state.isLoading = true;
-      // })
-      // .addCase(registerUser.fulfilled, (state) => {
-      //   state.isLoading = false;
-      //   state.user = null;
-      //   state.isAuthenticated = false;
-      // })
-      // .addCase(registerUser.rejected, (state) => {
-      //   state.isLoading = false;
-      //   state.user = null;
-      //   state.isAuthenticated = false;
-      // })
-      // .addCase(loginUser.pending, (state) => {
-      //   state.isLoading = true;
-      // })
-      // .addCase(loginUser.fulfilled, (state, action) => {
-      //   state.isLoading = false;
-      //   state.user = action.payload.success ? action.payload.user : null;
-      //   state.isAuthenticated = action.payload.success;
-      // })
-      // .addCase(loginUser.rejected, (state) => {
-      //   state.isLoading = false;
-      //   state.user = null;
-      //   state.isAuthenticated = false;
-      // })
       .addCase(authUser.pending, (state) => {
         state.isLoading = true;
       })
@@ -203,6 +150,10 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
+
+        if (action.payload.success) {
+          localStorage.setItem("authUser", JSON.stringify(action.payload.user));
+        }
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
@@ -213,6 +164,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+        localStorage.removeItem("authUser");
       });
   },
 });

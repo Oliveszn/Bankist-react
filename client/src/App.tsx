@@ -16,20 +16,6 @@ function App() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  // let age: number = 10;
-  // let firstName: String = "olive";
-
-  // firstName = "mike";
-
-  // let user: { name: string; age: number; id: number } = {
-  //   name: "mario",
-  //   age: 33,
-  //   id: 1,
-  // };
-
-  // console.log(user);
-
-  // console.log(age, firstName);
 
   const handleCloseModal = () => {
     // this is to make the use go back to where they came from, or home as fallback

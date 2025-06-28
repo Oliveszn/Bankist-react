@@ -19,7 +19,7 @@ const CheckAuth = ({ isAuthenticated, children }: CheckAuthProps) => {
 
   // If user is not authenticated and tries to access admin routes, redirect to login
   if (!isAuthenticated && location.pathname.includes("/dashboard")) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
 
   return <>{children}</>;
