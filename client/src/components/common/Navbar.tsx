@@ -1,4 +1,4 @@
-import logo from "../../../public/logo.png";
+import logo from "/logo.png?url";
 import { logoutUser } from "../../store/auth-slice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { Link, useNavigate } from "react-router-dom";

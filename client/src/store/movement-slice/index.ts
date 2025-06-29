@@ -1,58 +1,152 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
+import type {
+  Movement,
+  MovementState,
+  LoanFormData,
+  TransferFormData,
+  ApiResponse,
+} from "../../utils/types";
 
-interface movementState {
-  status: "idle" | "loading" | "succeeded" | "failed";
-  movement: any[];
-  totalPages: number;
-  currentPage: number;
-  totalCount: number;
-}
-
-const initialState: movementState = {
+const initialState: MovementState = {
   status: "idle",
-  movement: [],
+  movements: [],
   totalPages: 0,
-  currentPage: 0,
+  currentPage: 1,
   totalCount: 0,
+  error: null,
 };
 
-export const getMovements = createAsyncThunk(
-  "auth/getMovs",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/auth/movements`,
-        {
-          withCredentials: true,
-        }
-      );
-      return response.data;
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        return rejectWithValue(error.response?.data?.message || error.message);
-      }
-      return rejectWithValue("An unexpected error occurred");
-    }
+const handleApiError = (error: unknown): string => {
+  if (error instanceof AxiosError) {
+    return error.response?.data?.message || error.message;
   }
-);
+  return "An unexpected error occurred";
+};
+
+export const getMovements = createAsyncThunk<
+  { movements: Movement[]; totalPages: number; totalCount: number },
+  { page?: number },
+  { rejectValue: string }
+>("movements/getMovements", async ({ page = 1 } = {}, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/auth/movements?page=${page}`,
+      { withCredentials: true }
+    );
+
+    return {
+      movements: response.data.data || [],
+      totalPages: response.data.totalPages,
+      totalCount: response.data.totalCount,
+    };
+  } catch (error) {
+    return rejectWithValue(handleApiError(error));
+  }
+});
+
+export const getLoan = createAsyncThunk<
+  { movement: Movement; message: string },
+  LoanFormData,
+  { rejectValue: string }
+>("movements/getLoan", async (formData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post<ApiResponse<Movement>>(
+      `${import.meta.env.VITE_API_URL}/api/loan`,
+      formData,
+      { withCredentials: true }
+    );
+    console.log("Loan API Response:", response.data);
+    return {
+      movement: response.data.movement,
+      message: response.data.message,
+    };
+  } catch (error) {
+    return rejectWithValue(handleApiError(error));
+  }
+});
+
+export const transferMoney = createAsyncThunk<
+  { senderMovement: Movement; recipientMovement: Movement; message: string },
+  TransferFormData,
+  { rejectValue: string }
+>("movements/transferMoney", async (formData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post<
+      ApiResponse<{
+        senderMovement: Movement;
+        recipientMovement: Movement;
+      }>
+    >(`${import.meta.env.VITE_API_URL}/api/send`, formData, {
+      withCredentials: true,
+    });
+
+    return {
+      senderMovement: response.data.movement,
+      recipientMovement: response.data.movement,
+      message: response.data.message,
+    };
+  } catch (error) {
+    return rejectWithValue(handleApiError(error));
+  }
+});
 
 const movementSlice = createSlice({
-  name: "movs",
+  name: "movements",
   initialState,
-  reducers: {},
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    resetStatus: (state) => {
+      state.status = "idle";
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getMovements.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(getMovements.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.movement = action.payload.data;
+        state.movements = action.payload.movements;
+        state.totalPages = action.payload.totalPages;
+        state.totalCount = action.payload.totalCount;
+        state.error = null;
       })
-      .addCase(getMovements.rejected, (state) => {
+      .addCase(getMovements.rejected, (state, action) => {
         state.status = "failed";
+        state.error = action.payload || "Failed to fetch movements";
+      })
+      .addCase(getLoan.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(getLoan.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(getLoan.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to process loan";
+        console.log(action.payload);
+      })
+      .addCase(transferMoney.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(transferMoney.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.movements.unshift(action.payload.senderMovement);
+        state.totalCount += 1;
+        state.error = null;
+      })
+      .addCase(transferMoney.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to transfer money";
       });
   },
 });
+export const { clearError, resetStatus } = movementSlice.actions;
 export default movementSlice.reducer;

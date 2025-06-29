@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { checkAuth } from "./store/auth-slice";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";

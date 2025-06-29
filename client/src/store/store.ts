@@ -9,7 +9,7 @@ const store = configureStore({
     auth: authReducer,
     toast: toastReducer,
     user: userReducer,
-    movs: movementReducer,
+    movements: movementReducer,
   },
 });
 
