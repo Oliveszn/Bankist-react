@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import type {
   Movement,
@@ -25,7 +25,12 @@ const handleApiError = (error: unknown): string => {
 };
 
 export const getMovements = createAsyncThunk<
-  { movements: Movement[]; totalPages: number; totalCount: number },
+  {
+    movements: Movement[];
+    totalPages: number;
+    totalCount: number;
+    currentPage: number;
+  },
   { page?: number },
   { rejectValue: string }
 >("movements/getMovements", async ({ page = 1 } = {}, { rejectWithValue }) => {
@@ -35,10 +40,13 @@ export const getMovements = createAsyncThunk<
       { withCredentials: true }
     );
 
+    console.log(response.data);
+
     return {
       movements: response.data.data || [],
       totalPages: response.data.totalPages,
       totalCount: response.data.totalCount,
+      currentPage: response.data.currentPage,
     };
   } catch (error) {
     return rejectWithValue(handleApiError(error));
@@ -113,6 +121,7 @@ const movementSlice = createSlice({
         state.movements = action.payload.movements;
         state.totalPages = action.payload.totalPages;
         state.totalCount = action.payload.totalCount;
+        state.currentPage = action.payload.currentPage;
         state.error = null;
       })
       .addCase(getMovements.rejected, (state, action) => {

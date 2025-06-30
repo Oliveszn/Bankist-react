@@ -27,24 +27,13 @@ const getUser = async (req, res) => {
 
 const getMovements = async (req, res) => {
   try {
-    // const page = parseInt(req.query.page) || 1;
-    // const limit = parseInt(req.query.limit) || 5;
-    // const skip = (page - 1) * limit;
-
-    // const sortBy = req.query.sortBy || "createdAt";
-    // const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
-    // const totalMovs = await movements.countDocuments();
-    // const totalPages = Math.ceil(totalMovs / limit);
-
-    // const sortObj = {};
-    // sortObj[sortBy] = sortOrder;
     ///page is the pages like cuurent page
     ///limit is how many items you want to show on a particular page
     ///offset is how many items you skip when youre on a particular page,
     const userId = req.user.id;
     const {
       page = 1,
-      limit = 2,
+      limit = 7,
       sortBy = "created_at",
       sortOrder = "DESC",
     } = req.query;

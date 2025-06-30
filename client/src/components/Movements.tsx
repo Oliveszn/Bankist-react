@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { getMovements } from "../store/movement-slice";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Movements = () => {
-  const { movements, status, error } = useAppSelector(
-    (state) => state.movements
-  );
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { movements, status, error, currentPage, totalPages, totalCount } =
+    useAppSelector((state) => state.movements);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -16,23 +16,77 @@ const Movements = () => {
   }, [dispatch, isAuthenticated]);
 
   if (status === "loading") {
-    return <p>Loading movements...</p>;
+    return (
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <p className="ml-2">Loading movements...</p>
+        </div>
+      </div>
+    );
   }
 
   if (status === "failed") {
-    return <p>Error loading movements: {error}</p>;
+    return (
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="text-center text-red-600">
+          <p>Error loading movements: {error}</p>
+          <button
+            onClick={() => dispatch(getMovements({}))}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   //// we did this because it kept returning an error which menat
   //// movement wanst an array when map was being called so we had to defensively handle it
   if (!Array.isArray(movements)) {
     console.error("Movements is not an array:", movements);
-    return <p>Error: Invalid movements data</p>;
+    return (
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <p className="text-red-600">Error: Invalid movements data</p>
+      </div>
+    );
   }
 
+  ///function for handling page changing
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      dispatch(getMovements({ page: newPage }));
+    }
+  };
+
+  ////gettong page numbers
+  const getPageNumbers = () => {
+    const pages = [];
+
+    ////show up to 5 page number
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    ////adjust the start page if we are close to end
+    if (endPage - startPage < 4) {
+      startPage = Math.max(1, endPage - 4);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+  console.log(currentPage);
+
   return (
+    // <>
     <div>
-      <h2>Recent Movements</h2>
+      <h2>
+        {movements.length} of {totalCount} transactions
+      </h2>
       {movements.length === 0 && <p>No movements found.</p>}
       <ul>
         {movements
@@ -51,13 +105,13 @@ const Movements = () => {
               const date = mov.created_at || mov.date;
 
               return (
-                <div
+                <li
                   key={mov.id || i}
-                  className="flex items-center justify-between py-2"
+                  className="flex items-center justify-between py-2 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${
                         mov.type === "deposit"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
@@ -77,15 +131,74 @@ const Movements = () => {
                     {displayAmount > 0 ? "+" : ""}
                     {displayAmount}€
                   </span>
-                </div>
+                </li>
               );
             } catch (error) {
               console.error("Error rendering movement:", mov, error);
-              return <li key={i}>Error displaying movement</li>;
+              return (
+                <div key={i} className="p-4 text-red-500">
+                  Error displaying movement
+                </div>
+              );
             }
           })}
       </ul>
+
+      {totalPages >= 1 && (
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-500">
+              Page {currentPage} of {totalPages}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              {/* //////Previous Button */}
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-md ${
+                  currentPage === 1
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              {/* //// Page Numbers */}
+              {getPageNumbers().map((pageNum, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-1 rounded-md text-sm ${
+                    pageNum === currentPage
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+              {/* ///// next button */}
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-md ${
+                  currentPage === totalPages
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+    // </>
   );
 };
 
