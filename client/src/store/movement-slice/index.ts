@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import type {
   Movement,
@@ -39,8 +39,6 @@ export const getMovements = createAsyncThunk<
       `${import.meta.env.VITE_API_URL}/api/auth/movements?page=${page}`,
       { withCredentials: true }
     );
-
-    console.log(response.data);
 
     return {
       movements: response.data.data || [],

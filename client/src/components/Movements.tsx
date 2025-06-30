@@ -2,16 +2,20 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { getMovements } from "../store/movement-slice";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 const Movements = () => {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { movements, status, error, currentPage, totalPages, totalCount } =
     useAppSelector((state) => state.movements);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(getMovements({}));
+      /////and persist on reload
+      const pageFromURL = parseInt(searchParams.get("page") || "1", 10);
+      dispatch(getMovements({ page: pageFromURL }));
     }
   }, [dispatch, isAuthenticated]);
 
@@ -56,6 +60,8 @@ const Movements = () => {
   ///function for handling page changing
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
+      ////added search params to store current page in url
+      setSearchParams({ page: newPage.toString() });
       dispatch(getMovements({ page: newPage }));
     }
   };
@@ -79,71 +85,71 @@ const Movements = () => {
 
     return pages;
   };
-  console.log(currentPage);
 
   return (
     // <>
-    <div>
+    <div className="bg-white rounded-lg shadow-md p-4 w-full sm:max-w-lg md:max-w-2xl mx-auto">
       <h2>
         {movements.length} of {totalCount} transactions
       </h2>
       {movements.length === 0 && <p>No movements found.</p>}
-      <ul>
-        {movements
-          .filter((mov) => {
-            if (!mov || typeof mov !== "object") return false;
-            if (!mov.type || !mov.amount) return false;
-            return true;
-          })
-          .map((mov, i) => {
-            try {
-              const amount =
-                typeof mov.amount === "string"
-                  ? parseFloat(mov.amount)
-                  : mov.amount;
-              const displayAmount = Math.abs(amount);
-              const date = mov.created_at || mov.date;
+      <div className="h-[300px] overflow-y-auto rounded-md">
+        <ul className="divide-y divide-gray-200">
+          {movements
+            .filter((mov) => {
+              if (!mov || typeof mov !== "object") return false;
+              if (!mov.type || !mov.amount) return false;
+              return true;
+            })
+            .map((mov, i) => {
+              try {
+                const amount =
+                  typeof mov.amount === "string"
+                    ? parseFloat(mov.amount)
+                    : mov.amount;
+                const displayAmount = Math.abs(amount);
+                const date = mov.created_at || mov.date;
 
-              return (
-                <li
-                  key={mov.id || i}
-                  className="flex items-center justify-between py-2 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
+                return (
+                  <li
+                    key={mov.id || i}
+                    className="flex items-center justify-between py-2 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${
+                          mov.type === "deposit"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {mov.type}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(date).toLocaleDateString()}
+                      </span>
+                    </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${
-                        mov.type === "deposit"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                      className={`font-medium ${
+                        displayAmount > 0 ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {mov.type}
+                      {displayAmount > 0 ? "+" : ""}
+                      {displayAmount}€
                     </span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(date).toLocaleDateString()}
-                    </span>
+                  </li>
+                );
+              } catch (error) {
+                console.error("Error rendering movement:", mov, error);
+                return (
+                  <div key={i} className="p-4 text-red-500">
+                    Error displaying movement
                   </div>
-                  <span
-                    className={`font-medium ${
-                      displayAmount > 0 ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {displayAmount > 0 ? "+" : ""}
-                    {displayAmount}€
-                  </span>
-                </li>
-              );
-            } catch (error) {
-              console.error("Error rendering movement:", mov, error);
-              return (
-                <div key={i} className="p-4 text-red-500">
-                  Error displaying movement
-                </div>
-              );
-            }
-          })}
-      </ul>
-
+                );
+              }
+            })}
+        </ul>
+      </div>
       {totalPages >= 1 && (
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
