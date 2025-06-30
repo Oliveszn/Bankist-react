@@ -122,6 +122,29 @@ export const checkAuth = createAsyncThunk(
   }
 );
 
+export const deleteAccount = createAsyncThunk(
+  "/auth/delete",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/delete`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        return rejectWithValue(error.response?.data || error.message);
+      }
+
+      return rejectWithValue("An unexpected error occurred");
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -165,6 +188,21 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         localStorage.removeItem("authUser");
+      })
+      .addCase(deleteAccount.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteAccount.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.success
+          ? action.payload.user || null
+          : null;
+        state.isAuthenticated = action.payload.success;
+      })
+      .addCase(deleteAccount.rejected, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.isAuthenticated = false;
       });
   },
 });

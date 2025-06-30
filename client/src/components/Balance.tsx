@@ -14,14 +14,18 @@ const Balance = () => {
   }, [dispatch, isAuthenticated]);
 
   return (
-    <div className="col-span-2 flex items-end justify-between mb-8">
-      <div>
-        <p className="">Current balance</p>
-        <p className="">
-          As of <span className="">{new Date().toLocaleDateString()}</span>
-        </p>
+    <div className="bg-gray-50 p-6 rounded-lg">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h2 className="text-lg font-medium text-gray-700">Current balance</h2>
+          <p className="text-sm text-gray-500">
+            As of <span className="">{new Date().toLocaleDateString()}</span>
+          </p>
+        </div>
+        {user && (
+          <div className="text-3xl font-bold text-gray-800"> ₦{balance}</div>
+        )}
       </div>
-      <div>{user && <span className="">₦{balance}</span>}</div>
     </div>
   );
 };

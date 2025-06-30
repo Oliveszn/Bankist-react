@@ -66,7 +66,7 @@ const Transaction = () => {
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       return dispatch(
         showToast({
-          message: "Input a valid number",
+          message: "Input a valid amount",
           type: "error",
         })
       );
@@ -88,7 +88,15 @@ const Transaction = () => {
 
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(transferFormData);
+    if (transferFormData.amount || transferFormData.amount <= 0) {
+      return dispatch(
+        showToast({
+          message: "Input a valid number",
+          type: "error",
+        })
+      );
+    }
+
     try {
       const result = await dispatch(transferMoney(transferFormData)).unwrap();
       dispatch(getMovements({ page: 1 }));
@@ -105,25 +113,25 @@ const Transaction = () => {
 
   const isLoading = status === "loading";
   return (
-    <div>
-      <div className="rounded-lg p-12 text-gray-700 bg-gradient-to-tl from-yellow-500 to-yellow-400 my-6 sm:my-0">
-        <h2 className="mb-6 text-3xl font-semibold text-gray-700">
+    <div className="space-y-4">
+      <div className="rounded-lg p-6 bg-gradient-to-tl from-yellow-500 to-yellow-400 my-6 ">
+        <h2 className="mb-6 text-lg font-semibold text-gray-800">
           Transfer money
         </h2>
         <form
-          className="grid grid-cols-3 grid-rows-auto gap-y-1 gap-x-4 md:grid-cols-3 md:grid-rows-auto md:gap-x-4 md:gap-y-1"
+          className="grid grid-cols-1 md:grid-cols-3 gap-3"
           onSubmit={handleTransfer}
         >
           <input
             type="text"
-            placeholder="Recipient Username"
+            placeholder="Transfer to"
             id="recipientUsername"
             name="recipientUsername"
             value={transferFormData.recipientUsername}
             onChange={handleTransferChange}
             disabled={isLoading}
             required
-            className="w-full bg-white bg-opacity-40 font-inherit text-center text-2xl text-gray-700 rounded-lg px-4 py-1 transition duration-300 focus:outline-none focus:bg-white focus:bg-opacity-60 form__input--to"
+            className="w-full p-3 rounded-md bg-yellow-300 bg-opacity-50 placeholder-gray-600 text-gray-800 border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
           <input
             type="number"
@@ -133,7 +141,7 @@ const Transaction = () => {
             value={transferFormData.amount}
             onChange={handleTransferChange}
             disabled={isLoading}
-            className="w-full bg-white bg-opacity-40 font-inherit text-center text-2xl text-gray-700 rounded-lg px-4 py-1 transition duration-300 focus:outline-none focus:bg-white focus:bg-opacity-60 form__input--amount"
+            className="w-full p-3 rounded-md bg-yellow-300 bg-opacity-50 placeholder-gray-600 text-gray-800 border-0 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
           <button
             className="border-none rounded-lg text-3xl bg-white cursor-pointer transition duration-300 focus:outline-none focus:bg-white focus:bg-opacity-80 form__btn--transfer"
@@ -141,17 +149,21 @@ const Transaction = () => {
           >
             &rarr;
           </button>
-          <label className="text-xl text-center">Transfer to</label>
-          <label className="text-xl text-center">Amount</label>
+          <label className="text-sm text-gray-700 mt-1 hidden md:block">
+            Transfer to
+          </label>
+          <label className="text-sm text-gray-700 mt-1 hidden md:block">
+            Amount
+          </label>
         </form>
       </div>
       {/* LOAN */}
-      <div className="rounded-lg p-12 text-gray-700 bg-gradient-to-tl from-emerald-400 to-lime-500 my-6 sm:my-0">
-        <h2 className="mb-6 text-3xl font-semibold text-gray-700">
+      <div className="rounded-lg p-6 bg-gradient-to-tl from-emerald-400 to-lime-500 my-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Request loan
         </h2>
         <form
-          className="grid grid-cols-3 grid-rows-auto gap-y-1 gap-x-4 md:grid-cols-3 md:grid-rows-auto md:gap-x-4 md:gap-y-1"
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 "
           onSubmit={handleLoanSubmit}
         >
           <input
@@ -163,7 +175,7 @@ const Transaction = () => {
             onChange={handleLoanChange}
             disabled={isLoading}
             required
-            className="w-full bg-white bg-opacity-40 font-inherit text-center text-2xl text-gray-700 rounded-lg px-4 py-1 transition duration-300 focus:outline-none focus:bg-white focus:bg-opacity-60 form__input--loan-amount"
+            className="w-full p-3 rounded-md bg-green-300 bg-opacity-50 placeholder-gray-600 text-gray-800 border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           <button
             className="border-none rounded-lg text-3xl bg-white cursor-pointer transition duration-300 focus:outline-none focus:bg-white focus:bg-opacity-80 form__btn--loan"
@@ -172,20 +184,22 @@ const Transaction = () => {
             &rarr;
           </button>
 
-          <label className="text-xl text-center md:row-start-2">Amount</label>
+          <label className="text-sm text-gray-700 mt-1 hidden md:block">
+            Amount
+          </label>
         </form>
       </div>
 
       {/* CLOSE */}
-      <div className="rounded-lg p-12 text-gray-700 bg-gradient-to-tl from-rose-500 to-red-500 my-6 sm:my-0">
-        <h2 className="mb-6 text-3xl font-semibold text-gray-700">
+      <div className="rounded-lg p-6 bg-gradient-to-tl from-rose-500 to-red-500 my-6 sm:my-0">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Close account
         </h2>
-        <form className="grid grid-cols-3 grid-rows-auto gap-y-1 gap-x-4 md:grid-cols-3 md:grid-rows-auto md:gap-x-4 md:gap-y-1">
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
             type="text"
             placeholder="Username"
-            className="w-full bg-white bg-opacity-40 font-inherit text-center text-2xl text-gray-700 rounded-lg px-4 py-1 transition duration-300 focus:outline-none focus:bg-white focus:bg-opacity-60 form__input--user"
+            className="w-full p-3 rounded-md bg-red-300 bg-opacity-50 placeholder-gray-600 text-gray-800 border-0 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
 
           <button
@@ -194,8 +208,9 @@ const Transaction = () => {
           >
             &rarr;
           </button>
-          <label className="text-xl text-center">Confirm user</label>
-          <label className="text-xl text-center">Confirm PIN</label>
+          <label className="text-sm text-gray-700 mt-1 hidden md:block">
+            Confirm user
+          </label>
         </form>
       </div>
     </div>

@@ -9,17 +9,6 @@ const Movements = () => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
 
-  console.log("All movements:", movements);
-  console.log(
-    "Movement details:",
-    movements?.map((mov, i) => ({
-      index: i,
-      movement: mov,
-      hasType: mov?.type,
-      hasAmount: mov?.amount,
-    }))
-  );
-
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(getMovements({}));
@@ -62,10 +51,33 @@ const Movements = () => {
               const date = mov.created_at || mov.date;
 
               return (
-                <li key={mov.id || i}>
-                  <strong>{mov.type.toUpperCase()}</strong> — ₦{displayAmount}{" "}
-                  on {new Date(date).toLocaleDateString()}
-                </li>
+                <div
+                  key={mov.id || i}
+                  className="flex items-center justify-between py-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        mov.type === "deposit"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {mov.type}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span
+                    className={`font-medium ${
+                      displayAmount > 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {displayAmount > 0 ? "+" : ""}
+                    {displayAmount}€
+                  </span>
+                </div>
               );
             } catch (error) {
               console.error("Error rendering movement:", mov, error);
