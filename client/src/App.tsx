@@ -9,6 +9,7 @@ import { AuthModal } from "./components/auth/AuthModal";
 import Navbar from "./components/common/Navbar";
 import ToastNotifs from "./components/common/ToastNotifs";
 import { hideToast } from "./store/ui-slice/toast-slice";
+import { setDarkMode, toggleDarkMode } from "./store/ui-slice/theme-slice";
 
 function App() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -34,8 +35,16 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
+  ///darkmode
+  const darkMode = useAppSelector((state) => state.theme.theme);
+  useEffect(() => {
+    // const savedMode = localStorage.getItem('darkMode') === 'true';
+    const savedMode = localStorage.getItem("theme") === "true";
+    dispatch(setDarkMode(savedMode));
+  }, [dispatch]);
+
   return (
-    <>
+    <div className={darkMode ? "dark" : ""}>
       <Navbar />
       {toast.show && (
         <ToastNotifs toast={toast} hideToast={() => dispatch(hideToast())} />
@@ -59,7 +68,10 @@ function App() {
           }
         />
       </Routes>
-    </>
+      <button onClick={() => dispatch(toggleDarkMode())}>
+        {darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      </button>
+    </div>
   );
 }
 

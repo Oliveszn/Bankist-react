@@ -18,7 +18,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full shadow-bottom bg-[#f3f3f3]">
+    <nav className="w-full shadow-bottom bg-[#f3f3f3] dark:bg-[#333]">
       <div className=" flex justify-between items-center py-4 px-6">
         {user ? (
           <p className="font-medium"> Welcome back,{user.username}</p>
